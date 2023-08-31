@@ -16,25 +16,14 @@ const Slider = () => {
   };
   /*
   Problème avec le paramètre de setTimeout:
-  L'utilisation de setTimeout dans nextCard pourrait causer 
-  des problèmes en raison de la manière dont les fermetures 
-  (closures) captent les valeurs dans JavaScript. 
-  Pour vous assurer que vous utilisez la valeur actuelle d'index, 
-  vous pouvez le passer en tant que paramètre dans nextCard :
+
 */
   useEffect(() => {
     nextCard();
   }, [index]);  
   /*
   Utilisation de useEffect sans dépendance
-  Dans useEffect, il est recommandé de fournir 
-  un tableau de dépendances. 
-  Cela permet de contrôler quand l'effet doit être exécuté. 
-  Si vous le laissez vide, comme dans votre cas, 
-  l'effet sera exécuté à chaque rendu. 
-  Si vous voulez qu'il s'exécute uniquement lorsqu'il y a 
-  un changement dans index (ce qui semble être le cas), 
-  vous devriez ajouter index comme dépendance
+
 */
   return (
     <div className="SlideCardList">
@@ -44,9 +33,7 @@ const Slider = () => {
         key={event.id} 
         /*
         event.id à la place de event.title
-        Clé manquante dans la boucle map:
-        la fonction map pour afficher la liste des événements 
-        doit fournir une clé unique à chaque élément généré. 
+     
         */
         className={`SlideCard SlideCard--${
           index === idx ? "display" : "hide"}`}
