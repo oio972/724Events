@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+/*
+import { useEffect, useState } from "react";
+*/
 import Menu from "../../containers/Menu";
 import ServiceCard from "../../components/ServiceCard";
 import EventCard from "../../components/EventCard";
@@ -11,20 +15,24 @@ import Icon from "../../components/Icon";
 import Form from "../../containers/Form";
 import Modal from "../../containers/Modal";
 import { useData } from "../../contexts/DataContext";
+import lastEvent from "../../components/LastEvent/LastEvent";
 
 const Page = () => {
-  const {last} = useData()
+  const {data} = useData()
+  const [last, setLast] = useState()
+  useEffect(() => {
+    if(data) setLast(lastEvent(data?.events.slice()))
+  })
   return <>
     <header>
       <Menu />
     </header>
     <main>
       <section className="SliderContainer">
-        {/* probleme dans le slider */}
         <Slider />
       </section>
       <section className="ServicesContainer">
-        <h2 className="Title">Nos services</h2>
+        <h2 id="nos-services" className="Title">Nos services</h2>
         <p>Nous organisons des événements sur mesure partout dans le monde</p>
         <div className="ListContainer">
           <ServiceCard imageSrc="/images/priscilla-du-preez-Q7wGvnbuwj0-unsplash1.png">
@@ -53,7 +61,7 @@ const Page = () => {
         </div>
       </section>
       <section className="EventsContainer">
-        <h2 className="Title">Nos réalisations</h2>
+        <h2 id="nos-realisations" className="Title">Nos réalisations</h2>
         <EventList />
       </section>
       <section className="PeoplesContainer">
@@ -117,13 +125,16 @@ const Page = () => {
     <footer className="row">
       <div className="col presta">
         <h3>Notre derniére prestation</h3>
+        {last && (
         <EventCard
-          imageSrc={last?.cover}
-          title={last?.title}
-          date={new Date(last?.date)}
+          imageSrc={last.cover}
+          title={last.title}
+          date={new Date(last.date)}
           small
           label="boom"
+          data-testid="lastEvent"
         />
+        )}
       </div>
       <div className="col contact">
         <h3>Contactez-nous</h3>
@@ -159,3 +170,36 @@ const Page = () => {
 }
 
 export default Page;
+
+
+
+
+/*
+-probleme dans le composant "slider" 
+const nextCard = () => {
+  if (byDateDesc) {
+    setIndex((idx) => (idx < byDateDesc.length - 1 ? idx + 1 : 0));
+  }
+  };
+  const switchCard = (id) => {
+    setIndex(id);
+  };
+  useEffect(() => {
+    const timer = setInterval(() => {
+      nextCard();
+    }, 5000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [index, nextCard]);
+-ajout de la fonction "onSuccess()" dans le composant "form"
+-ajout deux "filter" au lieu d'un: 
+  Le premier "filter" filtre les événements en fonction de la condition 
+  !type || type === event.type. 
+  Le deuxième "filter" filtre ensuite les événements en fonction 
+  de leur indice (index) pour obtenir la pagination.
+  En combinant ces deux filtres, on peut filtrer d'abord les événements 
+  en fonction d'une condition, puis paginer la liste résultante 
+  en fonction de l'indice, ce qui permet de gérer plus 
+  efficacement de grandes quantités de données.
+*/
