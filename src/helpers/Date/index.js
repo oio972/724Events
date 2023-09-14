@@ -13,4 +13,9 @@ export const MONTHS = {
   12: "décembre",
 };
 
-export const getMonth = (date) => MONTHS[date.getMonth()];
+export const getMonth = (date) => MONTHS[date.getMonth() +1];
+
+/*
+Ajout +1 à getMonth() pour correspondre à MONTHS (par défaut, janvier = 0 et non 1) 
+: Résolution des décallages + "undefined" les évènements en janvier
+*/

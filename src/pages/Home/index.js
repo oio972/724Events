@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
-/*
-import { useEffect, useState } from "react";
-*/
+import React, { useEffect, useState } from "react";
 import Menu from "../../containers/Menu";
 import ServiceCard from "../../components/ServiceCard";
+// eslint-disable-next-line no-unused-vars
 import EventCard from "../../components/EventCard";
 import PeopleCard from "../../components/PeopleCard";
 
@@ -15,14 +13,14 @@ import Icon from "../../components/Icon";
 import Form from "../../containers/Form";
 import Modal from "../../containers/Modal";
 import { useData } from "../../contexts/DataContext";
-import lastEvent from "../../components/LastEvent/LastEvent";
+import LastEvent from "../../helpers/LastEvent";
 
 const Page = () => {
-  const {data} = useData()
-  const [last, setLast] = useState()
+  const { data } = useData();
+  const [last, setLast] = useState();
   useEffect(() => {
-    if(data) setLast(lastEvent(data?.events.slice()))
-  })
+    if (data) setLast(LastEvent(data?.events.slice()));
+  }, [data]);
   return <>
     <header>
       <Menu />
@@ -31,8 +29,8 @@ const Page = () => {
       <section className="SliderContainer">
         <Slider />
       </section>
-      <section className="ServicesContainer">
-        <h2 id="nos-services" className="Title">Nos services</h2>
+      <section className="ServicesContainer" id="nos-services">
+        <h2 className="Title">Nos services</h2>
         <p>Nous organisons des événements sur mesure partout dans le monde</p>
         <div className="ListContainer">
           <ServiceCard imageSrc="/images/priscilla-du-preez-Q7wGvnbuwj0-unsplash1.png">
@@ -60,12 +58,12 @@ const Page = () => {
           </ServiceCard>
         </div>
       </section>
-      <section className="EventsContainer">
-        <h2 id="nos-realisations" className="Title">Nos réalisations</h2>
+      <section className="EventsContainer" id="nos-realisations">
+        <h2 className="Title">Nos réalisations</h2>
         <EventList />
       </section>
-      <section className="PeoplesContainer">
-        <h2 className="Title">Notre équipe</h2>
+      <section className="PeoplesContainer" id="notre-equipe">
+        <h2 className="Title" id="notre-equipe">Notre équipe</h2>
         <p>Une équipe d’experts dédiés à l’ogranisation de vos événements</p>
         <div className="ListContainer">
           <PeopleCard
@@ -105,7 +103,7 @@ const Page = () => {
         <Modal
           Content={
             <div className="ModalMessage--success">
-              <div>Message envoyé !</div>
+              <div data-testid="successMessage">Message envoyé !</div>
               <p>
                 Merci pour votre message nous tâcherons de vous répondre dans
                 les plus brefs délais
@@ -122,19 +120,16 @@ const Page = () => {
         </Modal>
       </div>
     </main>
-    <footer className="row">
+    <footer className="row" data-testid="footer">
       <div className="col presta">
         <h3>Notre derniére prestation</h3>
-        {last && (
-        <EventCard
+        {(last) ? <EventCard
           imageSrc={last.cover}
           title={last.title}
           date={new Date(last.date)}
           small
           label="boom"
-          data-testid="lastEvent"
-        />
-        )}
+        /> : ''}
       </div>
       <div className="col contact">
         <h3>Contactez-nous</h3>
@@ -174,32 +169,82 @@ export default Page;
 
 
 
+
 /*
--probleme dans le composant "slider" 
-const nextCard = () => {
-  if (byDateDesc) {
-    setIndex((idx) => (idx < byDateDesc.length - 1 ? idx + 1 : 0));
-  }
+helpers date 
+Ajout +1 à getMonth() pour correspondre à MONTHS (par défaut, janvier = 0 et non 1) 
+: Résolution des décallages + "undefined" les évènements en janvier
+*/
+
+/*
+1 Clé manquante dans la boucle "map"
+2 Utilisation de useEffect sans dépendance
+3 Problème avec le paramètre de setTimeout
+*/
+
+/*
+Les modifications dans le code sont destinées à résoudre les problèmes 
+mentionnés et à améliorer la structure du composant. 
+Explication des modifications dans le contexte du code :
+
+Utilisation de setInterval au lieu de setTimeout:
+  Dans la fonction nextCard, j'ai supprimé le paramètre currentIndex car il n'était pas nécessaire.
+  J'ai remplacé setTimeout par setInterval dans la fonction useEffect pour créer une boucle de défilement automatique des cartes.
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    nextCard();
+  }, 5000);
+  return () => {
+    clearInterval(timer);
   };
-  const switchCard = (id) => {
-    setIndex(id);
-  };
-  useEffect(() => {
-    const timer = setInterval(() => {
-      nextCard();
-    }, 5000);
-    return () => {
-      clearInterval(timer);
-    };
-  }, [index, nextCard]);
--ajout de la fonction "onSuccess()" dans le composant "form"
--ajout deux "filter" au lieu d'un: 
-  Le premier "filter" filtre les événements en fonction de la condition 
-  !type || type === event.type. 
-  Le deuxième "filter" filtre ensuite les événements en fonction 
-  de leur indice (index) pour obtenir la pagination.
-  En combinant ces deux filtres, on peut filtrer d'abord les événements 
-  en fonction d'une condition, puis paginer la liste résultante 
-  en fonction de l'indice, ce qui permet de gérer plus 
-  efficacement de grandes quantités de données.
+}, [index]);
+Correction de la clé de la boucle map:
+  Dans la boucle map, changement de la clé en utilisant event.title au lieu de event.id car event.title semble être plus approprié pour une clé unique.
+
+<div key={event.title} className={`SlideCard SlideCard--${index === idx ? "display" : "hide"}`}>
+
+    Éléments parents pour chaque itération de la boucle map:
+      entouré chaque itération de la boucle map par un élément parent <div> pour assurer une structure correcte du DOM.
+
+<div className="SlideCardList">
+  {byDateDesc?.map((event, idx) => (
+    <div key={event.title} className={`SlideCard SlideCard--${index === idx ? "display" : "hide"}`}>
+      Contenu de la carte
+    </div>
+    <div className="SlideCard__paginationContainer">
+      Pagination
+    </div>
+  ))}
+</div>
+
+Ajout de l'appel à la fonction switchCard lors du changement de radio:
+  Dans la boucle map pour les radios, ajouté un "onChange" 
+  pour appeler la fonction switchCard avec l'indice correspondant 
+  lorsque l'utilisateur clique sur un radio.
+
+javascript
+
+<input
+  key={`${radioIdx + 1}`}
+  type="radio"
+  name="radio-button"
+  checked={index === radioIdx}
+  onChange={() => switchCard(radioIdx)}
+/>
+
+Ces modifications visent à améliorer la structure du composant 
+Slider et à résoudre les problèmes mentionnés tout en conservant 
+les fonctionnalités existantes.
+*/
+
+/*
+DataContext DataContext
+Ajout méthode last (Affiche le dernier évènement)
+*/
+/*
+Home Home
+  Rendu conditionné ("Notre dernière prestation") => évite un message d'erreur dans la console au premier chargement
+  Correction des ancrages sur la page
+  Débug message de validation du formulaire (-> component Form)
 */
